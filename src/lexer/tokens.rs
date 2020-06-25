@@ -79,10 +79,12 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return Some(Token { operator: BaseOperator::OrderedList, ..Default::default() });
     }
 
-    // match each char in a slice of char
-    let chars = start_chars.0.chars().collect::<Vec<char>>();
-    match &chars as &[char] {
-        ['#', ..] => {
+    // match each byte of the byte array
+    // See: https://www.reddit.com/r/rust/comments/f4usb4/pattern_matching_on_string_content_as_chars/fhtwe1f?utm_source=share&utm_medium=web2x
+    // See: https://doc.rust-lang.org/edition-guide/rust-2018/slice-patterns.html
+    match start_chars.0.as_bytes() {
+        // #
+        [35, ..] => {
             let depth = heading::get_heading_depth(line);
             Some(Token {
                 operator: BaseOperator::Heading,
@@ -92,9 +94,12 @@ fn match_basic_token(line: &str) -> Option<Token> {
                 ..Default::default()
             })
         },
-        ['*', ..] | ['-', ..] | ['+', ..] => Some(Token { operator: BaseOperator::UnorderedList, ..Default::default() }),
-        ['`', ..] => Some(Token { operator: BaseOperator::InlineCode, ..Default::default() }),
-        ['>', ..] => Some(Token { operator: BaseOperator::BlockQuotes, ..Default::default() }),
+        // * | - | +
+        [42, ..] | [45, ..] | [43, ..] => Some(Token { operator: BaseOperator::UnorderedList, ..Default::default() }),
+        // `
+        [96, ..] => Some(Token { operator: BaseOperator::InlineCode, ..Default::default() }),
+        // >
+        [62, ..] => Some(Token { operator: BaseOperator::BlockQuotes, ..Default::default() }),
         _ => Some(Token { operator: BaseOperator::Text, ..Default::default() })
     }
 }

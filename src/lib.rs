@@ -12,6 +12,10 @@ mod markdown {
             My name is Xiao xiao
 
             > I'm a little panda
+
+            1. I'm living in Sichuan
+
+            - I love eating baozi
         ";
 
         let res = lexer::tokens::get_tokens(content);
