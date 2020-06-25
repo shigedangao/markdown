@@ -3,16 +3,19 @@ mod parser;
 mod error;
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
-
-#[cfg(test)]
 mod markdown {
-    fn parse_markdown() -> Result<(), ()> {
+    use crate::lexer;
 
+    #[test]
+    fn parse_markdown() {
+        let content = "### Hello
+            My name is Xiao xiao
+
+            > I'm a little panda
+        ";
+
+        let res = lexer::tokens::get_tokens(content);
+        print!("{:?}", res);
+        assert!(!res.is_err());
     }
 }
