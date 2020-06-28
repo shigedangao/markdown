@@ -28,7 +28,7 @@ pub struct Token {
     pub line: usize,
     pub content: String,
     pub operator: BaseOperator,
-    pub metas: Meta
+    pub metas: Option<Meta>
 }
 
 /// Get Tokens
@@ -47,7 +47,6 @@ pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
     for (idx, line) in content.lines().enumerate() {
         let token = match_basic_token(line.trim());
         if let Some(mut t) = token {
-            t.content = line.trim().to_string();
             t.line = idx;
             tokens.push(t);
         }
@@ -65,7 +64,7 @@ pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
 /// * `line` &str
 ///
 /// # Return
-/// Token
+/// Option<Token>
 fn match_basic_token(line: &str) -> Option<Token> {
     if line.len() < MIN_CHAR_LENGTH {
         return None;
@@ -73,10 +72,17 @@ fn match_basic_token(line: &str) -> Option<Token> {
 
     let start_chars = line.split_at(MIN_CHAR_LENGTH);
 
+    let matches: &[char] = &['#', '*', '-', '+', '`', '>'];
+    let sanitized_content = line.trim_matches(matches).trim().to_string();
+
     // match ordered list (i.e: <number>. , 1., 2.)
     let ordered_list = start_chars.0.find(|c: char| c.is_numeric() && c > '.');
     if ordered_list.is_some() {
-        return Some(Token { operator: BaseOperator::OrderedList, ..Default::default() });
+        return Some(Token {
+            operator: BaseOperator::OrderedList,
+            content: sanitized_content,
+            ..Default::default()
+        });
     }
 
     // match each byte of the byte array
@@ -88,18 +94,35 @@ fn match_basic_token(line: &str) -> Option<Token> {
             let depth = heading::get_heading_depth(line);
             Some(Token {
                 operator: BaseOperator::Heading,
-                metas: Meta {
-                    HeadingLevel: depth
-                },
+                content: sanitized_content,
+                metas: Some(Meta { HeadingLevel: depth }),
                 ..Default::default()
             })
         },
         // * | - | +
-        [42, ..] | [45, ..] | [43, ..] => Some(Token { operator: BaseOperator::UnorderedList, ..Default::default() }),
+        [42, ..] | [45, ..] | [43, ..] => Some(Token {
+            operator: BaseOperator::UnorderedList,
+            content: sanitized_content,
+            ..Default::default()
+        }),
         // `
-        [96, ..] => Some(Token { operator: BaseOperator::InlineCode, ..Default::default() }),
+        [96, ..] => Some(Token {
+            operator: BaseOperator::InlineCode,
+            content: sanitized_content,
+            ..Default::default()
+        }),
         // >
-        [62, ..] => Some(Token { operator: BaseOperator::BlockQuotes, ..Default::default() }),
-        _ => Some(Token { operator: BaseOperator::Text, ..Default::default() })
+        [62, ..] => Some(Token {
+            operator: BaseOperator::BlockQuotes,
+            content: sanitized_content,
+            ..Default::default()
+        }),
+        _ => Some(Token {
+            operator: BaseOperator::Text,
+            content: sanitized_content,
+            ..Default::default()
+        })
     }
 }
+
+ 
