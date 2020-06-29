@@ -14,11 +14,12 @@ mod markdown {
             > I'm a little panda
 
             1. I'm living in Sichuan
+            2. I'm living in Seoul in a 12 floor building
 
             - I love eating baozi
         ";
 
-        let res = lexer::tokens::get_tokens(content);
+        let res = lexer::token::get_tokens(content);
         print!("{:?}", res);
         assert!(!res.is_err());
     }

@@ -1,5 +1,6 @@
 use std::default::Default;
-use super::heading;
+use super::{heading};
+use super::operator::bytes;
 use crate::error::LexerError;
 
 const MIN_CHAR_LENGTH: usize = 2;
@@ -20,7 +21,7 @@ impl Default for BaseOperator {
 
 #[derive(Default, Debug)]
 pub struct Meta {
-    HeadingLevel: heading::HeadingLevel
+    Heading: Option<heading::HeadingLevel>
 }
 
 #[derive(Default, Debug)]
@@ -70,59 +71,108 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return None;
     }
 
-    let start_chars = line.split_at(MIN_CHAR_LENGTH);
-
-    let matches: &[char] = &['#', '*', '-', '+', '`', '>'];
-    let sanitized_content = line.trim_matches(matches).trim().to_string();
-
-    // match ordered list (i.e: <number>. , 1., 2.)
-    let ordered_list = start_chars.0.find(|c: char| c.is_numeric() && c > '.');
+    let ordered_list = get_ordered_list_token(line);
     if ordered_list.is_some() {
-        return Some(Token {
-            operator: BaseOperator::OrderedList,
-            content: sanitized_content,
-            ..Default::default()
-        });
+        return ordered_list;
     }
 
+    let trimmed_content = trim_matches_content(line);
+    
+    // We only want to match for the few characters at the beginning
+    let start_chars = line.split_at(MIN_CHAR_LENGTH);
     // match each byte of the byte array
     // See: https://www.reddit.com/r/rust/comments/f4usb4/pattern_matching_on_string_content_as_chars/fhtwe1f?utm_source=share&utm_medium=web2x
     // See: https://doc.rust-lang.org/edition-guide/rust-2018/slice-patterns.html
     match start_chars.0.as_bytes() {
         // #
-        [35, ..] => {
+        [bytes::HEADING, ..] => {
             let depth = heading::get_heading_depth(line);
             Some(Token {
                 operator: BaseOperator::Heading,
-                content: sanitized_content,
-                metas: Some(Meta { HeadingLevel: depth }),
+                content: trimmed_content,
+                metas: Some(Meta { Heading: Some(depth) }),
                 ..Default::default()
             })
         },
         // * | - | +
-        [42, ..] | [45, ..] | [43, ..] => Some(Token {
+        [bytes::UNORDERED_MUL, ..] | 
+        [bytes::UNORDERED_MINUS, ..] |
+        [bytes::UNORDERED_PLUS, ..] => Some(Token {
             operator: BaseOperator::UnorderedList,
-            content: sanitized_content,
+            content: trimmed_content,
             ..Default::default()
         }),
         // `
-        [96, ..] => Some(Token {
+        [bytes::CODE, ..] => Some(Token {
             operator: BaseOperator::InlineCode,
-            content: sanitized_content,
+            content: trimmed_content,
             ..Default::default()
         }),
         // >
-        [62, ..] => Some(Token {
+        [bytes::BLOCKQUOTE, ..] => Some(Token {
             operator: BaseOperator::BlockQuotes,
-            content: sanitized_content,
+            content: trimmed_content,
             ..Default::default()
         }),
         _ => Some(Token {
             operator: BaseOperator::Text,
-            content: sanitized_content,
+            content: trimmed_content,
             ..Default::default()
         })
     }
 }
 
+/// Trim Matches Content
+///
+/// # Description
+/// Trim the matches content
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// String
+fn trim_matches_content(content: &str) -> String {
+    let matches: &[char] = &[
+        bytes::HEADING as char,
+        bytes::UNORDERED_MUL as char,
+        bytes::UNORDERED_MINUS as char,
+        bytes::UNORDERED_PLUS as char,
+        bytes::CODE as char,
+        bytes::BLOCKQUOTE as char
+    ];
+
+
+    content.trim_matches(matches).trim().to_string()
+}
  
+/// Get Ordered List Token
+///
+/// # Description
+/// For the ordered list we need to do more treatment as
+/// we need to see if the preceding character is a number and 
+/// if the next character is a "." 
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// Option<Token>
+fn get_ordered_list_token(content: &str) -> Option<Token> {
+    // match ordered list (i.e: <number>. , 1., 2.)
+    let ordered_list = content.find(|c: char| c.is_numeric() && c > '.');
+    if ordered_list.is_none() {
+        return None;
+    }
+
+    let trimmed_content = content
+        .trim_start_matches(|c: char| c.is_numeric() || c == '.')
+        .trim()
+        .to_string();
+
+    Some(Token {
+        operator: BaseOperator::OrderedList,
+        content: trimmed_content,
+        ..Default::default()
+    })
+}
