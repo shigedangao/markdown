@@ -1,10 +1,9 @@
 use regex::Regex;
 use lazy_static::lazy_static;
 use super::token::Token;
+use super::external;
 
 lazy_static!{
-    static ref LINK_RE: Regex = Regex::new(r"(?:__|[*#])|\[(.*?)\]\(.*?\)").unwrap();
-    static ref IMG_RE: Regex = Regex::new(r"(?:__|[*#])|!\[(.*?)\]\(.*?\)").unwrap();
     static ref STRIKE_RE: Regex = Regex::new(r"(\~\~(.*?)\~\~)").unwrap();
     static ref BOLD_RE: Regex = Regex::new(r"(\*\*(.*?)\*\*)|(\_\_(.*?)\_\_)").unwrap();
     static ref ITALIC_RE: Regex = Regex::new(r"(\*(.*?)\*)|(\_(.*?)\_)").unwrap();
@@ -14,13 +13,11 @@ lazy_static!{
 pub enum TextOperator {
     Bold,
     Underline,
-    Strike,
-    Link,
-    Image
+    Strike
 }
 
-pub struct LineMeta {
-    
+pub struct TextMetas {
+    images: Vec<external::LinkMeta>
 }
 
 /// Get Test Tokens
@@ -31,22 +28,10 @@ pub struct LineMeta {
 /// # Arguments
 /// * `token` token::Token
 pub fn get_text_tokens(token: &Token) {
-    // use split_terminator
-    get_link_object(&token.content);
-}
-
-/// Get Link Object
-///
-/// # Description
-/// Get link object from line
-///
-/// # Arguments
-/// * `line` &str
-///
-/// # Return
-fn get_link_object(content: &String) {
-    let captures = LINK_RE.captures_iter(content);
-    for c in captures {
-        println!("Capture {:?}", c);
-    }
+    // get images token
+    let images = external::get_image_metas(&token.content);
+    println!("{:?}", images);
+    
+    let links = external::get_link_metas(&token.content);
+    println!("{:?}", links);
 }

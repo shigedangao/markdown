@@ -21,10 +21,16 @@ mod markdown {
             [hello](lol)
 
             i really like lao food [foo](bar)
+
+            ![alt text](url)
         ";
 
         let res = lexer::token::get_tokens(content);
         print!("{:?}", res);
         assert!(!res.is_err());
     }
+}
+
+pub fn parse_markdown(content: &str) {
+    lexer::token::get_tokens(content);
 }

@@ -96,7 +96,10 @@ fn match_basic_token(line: &str) -> Option<Token> {
             Some(Token {
                 operator: BaseOperator::Heading,
                 content: trimmed_content,
-                metas: Some(Meta { Heading: Some(depth) }),
+                metas: Some(Meta {
+                    Heading: Some(depth),
+                    ..Default::default()
+                }),
                 ..Default::default()
             })
         },
