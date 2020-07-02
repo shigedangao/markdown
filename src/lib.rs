@@ -17,6 +17,10 @@ mod markdown {
             2. I'm living in Seoul in a 12 floor building
 
             - I love eating baozi
+
+            [hello](lol)
+
+            i really like lao food [foo](bar)
         ";
 
         let res = lexer::token::get_tokens(content);

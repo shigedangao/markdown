@@ -1,5 +1,5 @@
 use std::default::Default;
-use super::{heading};
+use super::{heading, text};
 use super::operator::bytes;
 use crate::error::LexerError;
 
@@ -50,6 +50,12 @@ pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
         if let Some(mut t) = token {
             t.line = idx;
             tokens.push(t);
+        }
+    }
+
+    for token in &tokens {
+        if token.operator == BaseOperator::Text {
+            text::get_text_tokens(token);
         }
     }
 

@@ -16,9 +16,9 @@
 ///
 /// Other token are gonna be treat as a content marker and will later be process by a content lexer
 /// The content lexer will have to match the following regex for each line
-/// - *...* -> bold
-/// - _..._ -> underline
-/// - --...-- -> strikethrought
+/// - **...** | __...__-> bold
+/// - _..._ | *...* -> italic
+/// - ~~...~~ -> strikethrought
 /// - []() -> link
 /// - ![]() -> image
 mod heading;
