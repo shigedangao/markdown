@@ -1,6 +1,5 @@
 use regex::Regex;
 use lazy_static::lazy_static;
-use super::token;
 
 // Creating static variable to match regex for external resource
 // such as link and images
@@ -25,24 +24,33 @@ pub struct ImageMeta {
 /// Get Link Object
 ///
 /// # Description
-/// Get link object from line
+/// Get link object from content of a line
 ///
 /// # Arguments
-/// * `line` &String
+/// * `content` &String
+/// * `images` &Vec<ImageMeta>
 ///
 /// # Return
-/// * `Vec<LinkMeta>`
-pub fn get_link_metas(content: &String) -> Option<Vec<LinkMeta>> {
+/// * `Option<Vec<LinkMeta>>`
+pub fn get_link_metas(content: &String, images: Option<Vec<ImageMeta>>) -> Option<Vec<LinkMeta>> {
     let captures = LINK_RE.captures_iter(content);
+    let mut imgs = Vec::new();
+    
+    if images.is_some() {
+        imgs = images.unwrap();
+    }
 
     let links: Vec<LinkMeta> = captures
-        .map(|link| {
-            let label = link.get(1);
-            let url = link.get(2);
+        .filter(|link| {
+            let title = link.get(1).unwrap().as_str();
+            let url = link.get(2).unwrap().as_str();
 
+            is_not_image(&imgs, title, url)
+        })
+        .map(|link| {
             LinkMeta {
-                title: label.unwrap().as_str().to_string(),
-                url: url.unwrap().as_str().to_string()
+                title: link.get(1).unwrap().as_str().to_string(),
+                url: link.get(2).unwrap().as_str().to_string()
             }
         })
         .collect();
@@ -86,11 +94,29 @@ pub fn get_image_metas(content: &String) -> Option<Vec<ImageMeta>> {
     Some(images)
 }
 
-/// Resolve Image Link Conflict
+/// Is Not Image
 ///
 /// # Description
-/// Resolve the issue when a link is generate instead of being an image
-/// this can happened due to the fact that Rust regex doesn't support the lookaround feature
-fn resolve_image_link_conflict(images: &Vec<ImageMeta>, links: &Vec<LinkMeta>) {
+/// Check that the link that is match isn't an image. Rust regex doesn't support lookaround feature.
+/// As a result we're not able to make a distinction between images and links itself. This walkaround
+/// goal is for each link to check if it already exist as an image. If so then skip the linkitem during
+/// the generation of the links tree
+///
+/// # Arguments
+/// * `images` &Vec<ImageMeta>
+/// * `link` LinkMeta
+///
+/// # Return
+/// bool
+fn is_not_image(images: &Vec<ImageMeta>, link_title: &str, link_url: &str) -> bool {
+    let images: Vec<&ImageMeta> = images
+        .into_iter()
+        .filter(|img| img.url == link_url && img.alt_text == link_title)
+        .collect();
 
+    if images.len() == 0 {
+        return true;
+    }
+
+    false
 }

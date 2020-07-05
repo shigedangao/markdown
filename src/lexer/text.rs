@@ -32,6 +32,6 @@ pub fn get_text_tokens(token: &Token) {
     let images = external::get_image_metas(&token.content);
     println!("{:?}", images);
     
-    let links = external::get_link_metas(&token.content);
+    let links = external::get_link_metas(&token.content, images);
     println!("{:?}", links);
 }
