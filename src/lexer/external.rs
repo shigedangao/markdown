@@ -41,17 +41,18 @@ pub fn get_link_metas(content: &String, images: Option<Vec<ImageMeta>>) -> Optio
     }
 
     let links: Vec<LinkMeta> = captures
-        .filter(|link| {
+        .filter_map(|link| {
             let title = link.get(1).unwrap().as_str();
             let url = link.get(2).unwrap().as_str();
 
-            is_not_image(&imgs, title, url)
-        })
-        .map(|link| {
-            LinkMeta {
-                title: link.get(1).unwrap().as_str().to_string(),
-                url: link.get(2).unwrap().as_str().to_string()
+            if is_not_image(&imgs, title, url) {
+                return Some(LinkMeta {
+                    title: title.to_string(),
+                    url: url.to_string()
+                });
             }
+
+            None
         })
         .collect();
 

@@ -23,6 +23,8 @@ mod markdown {
             i really like lao food [foo](bar)
 
             ![alt text](url)
+
+            Today is very ~~sunny~~ gloomy ~~hot~~ actually cold
         ";
 
         let res = lexer::token::get_tokens(content);
