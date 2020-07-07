@@ -25,6 +25,8 @@ mod markdown {
             ![alt text](url)
 
             Today is very ~~sunny~~ gloomy ~~hot~~ actually cold
+
+            I'm a **little** sick a *little*
         ";
 
         let res = lexer::token::get_tokens(content);

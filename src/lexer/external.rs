@@ -32,13 +32,13 @@ pub struct ImageMeta {
 ///
 /// # Return
 /// * `Option<Vec<LinkMeta>>`
-pub fn get_link_metas(content: &String, images: Option<Vec<ImageMeta>>) -> Option<Vec<LinkMeta>> {
+pub fn get_link_metas(content: &String, images: &Option<Vec<ImageMeta>>) -> Option<Vec<LinkMeta>> {
     let captures = LINK_RE.captures_iter(content);
-    let mut imgs = Vec::new();
+    let mut imgs = &Vec::new();
     
-    if images.is_some() {
-        imgs = images.unwrap();
-    }
+    if let Some(img) = images {
+        imgs = img;
+    } 
 
     let links: Vec<LinkMeta> = captures
         .filter_map(|link| {

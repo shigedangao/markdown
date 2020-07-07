@@ -2,28 +2,24 @@ use regex::Regex;
 use lazy_static::lazy_static;
 use super::token::Token;
 use super::external;
+use super::operator::pattern;
 
 lazy_static!{
     static ref STRIKE_RE: Regex = Regex::new(r"(\~\~(.*?)\~\~)").unwrap();
-    static ref BOLD_RE: Regex = Regex::new(r"(\*\*(.*?)\*\*)|(\_\_(.*?)\_\_)").unwrap();
-    static ref ITALIC_RE: Regex = Regex::new(r"(\*(.*?)\*)|(\_(.*?)\_)").unwrap();
-}
-
-#[derive(Debug, PartialEq)]
-pub enum TextOptionKind {
-    Bold,
-    Underline,
-    Strike
+    static ref BOLD_RE: Regex = Regex::new(r"(\*\*(.*?)\*\*)").unwrap();
+    static ref ITALIC_RE: Regex = Regex::new(r"(\*(.*?)\*)").unwrap();
 }
 
 pub struct TextMetas {
-    images: Vec<external::ImageMeta>,
-    links: Vec<external::LinkMeta>
+    images: Option<Vec<external::ImageMeta>>,
+    links: Option<Vec<external::LinkMeta>>,
+    bold: Option<Vec<TextOption>>,
+    italic: Option<Vec<TextOption>>,
+    strike: Option<Vec<TextOption>>
 }
 
 #[derive(Debug)]
 pub struct TextOption {
-    kind: TextOptionKind,
     word: String,
     col: Option<usize>
 }
@@ -34,42 +30,56 @@ pub struct TextOption {
 /// Get token for text object
 ///
 /// # Arguments
-/// * `token` token::Token
-pub fn get_text_tokens(token: &Token) {
+/// * TextMetas
+pub fn get_text_tokens(token: &Token) -> TextMetas {
     // get images token
     let images = external::get_image_metas(&token.content);
-    println!("{:?}", images);
-    
-    let links = external::get_link_metas(&token.content, images);
-    println!("{:?}", links);
+    let links = external::get_link_metas(&token.content, &images);
+    let strike = get_kind_content(&token.content, pattern::STRIKE, &STRIKE_RE);
+    let bold = get_kind_content(&token.content, pattern::BOLD, &BOLD_RE);
+    let italic = get_kind_content(&token.content, pattern::ITALIC, &ITALIC_RE);
 
-    let strike = get_strikethrough_content(&token.content);
-    println!("{:?}", strike);
+    TextMetas {
+        images,
+        links,
+        bold,
+        italic,
+        strike
+    }
+
 }
 
-/// Get Strikethrough content
+/// Get Kind Content
 ///
 /// # Description
-/// Get a list of strikethrough content on the line's content
+/// Get a list of kind content on the line's content
 ///
 /// # Arguments
-/// * `content` String
-fn get_strikethrough_content(content: &String) -> Option<Vec<TextOption>> {
-    let captures = STRIKE_RE.captures_iter(content);
+/// * `content` &String
+/// * `pattern` &str
+/// * `re` Regex
+///
+/// # Return
+/// Option<Vec<TextOption>>
+fn get_kind_content(content: &String, pattern: &str, re: &Regex) -> Option<Vec<TextOption>> {
+    let captures = re.captures_iter(content);
 
-    let strike: Vec<TextOption> = captures
+    let k: Vec<TextOption> = captures
         .map(|c| {
             let word = c.get(2).unwrap().as_str();
 
             TextOption {
-                kind: TextOptionKind::Strike,
                 word: word.to_string(),
-                col: get_indices("~~", word, content)
+                col: get_indices(pattern, word, content)    
             }
         })
         .collect();
 
-    Some(strike)
+    if k.len() == 0 {
+        return None;
+    }
+
+    Some(k)
 }
 
 /// Get Indices

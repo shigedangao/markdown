@@ -17,3 +17,12 @@ pub mod bytes {
     // Operator -> >
     pub const BLOCKQUOTE: u8 = 62;
 }
+
+pub mod pattern {
+    // TextOperator -> ~~
+    pub const BOLD: &str = "~~";
+    // TextOperator -> *
+    pub const ITALIC: &str = "*";
+    // TextOperator -> ~~
+    pub const STRIKE: &str = "~~";
+}
