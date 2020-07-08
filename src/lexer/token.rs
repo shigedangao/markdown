@@ -21,7 +21,8 @@ impl Default for BaseOperator {
 
 #[derive(Default, Debug)]
 pub struct Meta {
-    Heading: Option<heading::HeadingLevel>
+    pub heading: Option<heading::HeadingLevel>,
+    textMetas: Option<text::TextMetas>
 }
 
 #[derive(Default, Debug)]
@@ -49,13 +50,15 @@ pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
         let token = match_basic_token(line.trim());
         if let Some(mut t) = token {
             t.line = idx;
-            tokens.push(t);
-        }
-    }
+            if t.operator == BaseOperator::Text {
+                let text_opts = text::get_text_tokens(&t);
+                t.metas = Some(Meta {
+                    heading: None,
+                    textMetas: text_opts
+                });
+            }
 
-    for token in &tokens {
-        if token.operator == BaseOperator::Text {
-            text::get_text_tokens(token);
+            tokens.push(t);
         }
     }
 
@@ -97,7 +100,7 @@ fn match_basic_token(line: &str) -> Option<Token> {
                 operator: BaseOperator::Heading,
                 content: trimmed_content,
                 metas: Some(Meta {
-                    Heading: Some(depth),
+                    heading: Some(depth),
                     ..Default::default()
                 }),
                 ..Default::default()

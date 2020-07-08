@@ -10,6 +10,8 @@ lazy_static!{
     static ref ITALIC_RE: Regex = Regex::new(r"(\*(.*?)\*)").unwrap();
 }
 
+/// TextMetas
+#[derive(Debug)]
 pub struct TextMetas {
     images: Option<Vec<external::ImageMeta>>,
     links: Option<Vec<external::LinkMeta>>,
@@ -31,7 +33,7 @@ pub struct TextOption {
 ///
 /// # Arguments
 /// * TextMetas
-pub fn get_text_tokens(token: &Token) -> TextMetas {
+pub fn get_text_tokens(token: &Token) -> Option<TextMetas> {
     // get images token
     let images = external::get_image_metas(&token.content);
     let links = external::get_link_metas(&token.content, &images);
@@ -39,13 +41,13 @@ pub fn get_text_tokens(token: &Token) -> TextMetas {
     let bold = get_kind_content(&token.content, pattern::BOLD, &BOLD_RE);
     let italic = get_kind_content(&token.content, pattern::ITALIC, &ITALIC_RE);
 
-    TextMetas {
+    Some(TextMetas {
         images,
         links,
         bold,
         italic,
         strike
-    }
+    })
 
 }
 

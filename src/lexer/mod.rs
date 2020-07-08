@@ -22,7 +22,7 @@
 /// - []() -> link
 /// - ![]() -> image
 mod external;
-mod heading;
+pub mod heading;
 mod operator;
 mod text;
 pub mod token;

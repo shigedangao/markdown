@@ -1,6 +1,7 @@
 mod lexer;
 mod parser;
 mod error;
+mod test;
 
 #[cfg(test)]
 mod markdown {
@@ -30,7 +31,6 @@ mod markdown {
         ";
 
         let res = lexer::token::get_tokens(content);
-        print!("{:?}", res);
         assert!(!res.is_err());
     }
 }

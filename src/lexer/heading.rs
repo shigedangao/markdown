@@ -1,7 +1,7 @@
 use std::default::Default;
 
 /// Heading LEvel
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HeadingLevel {
     H1,
     H2,
