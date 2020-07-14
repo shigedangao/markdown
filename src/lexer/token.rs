@@ -85,6 +85,11 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return ordered_list;
     }
 
+    let unordered_list = list::get_unordered_list_token(line);
+    if unordered_list.is_some() {
+        return unordered_list;
+    }
+
     let trimmed_content = trim_matches_content(line);
     
     // We only want to match for the few characters at the beginning
@@ -106,14 +111,6 @@ fn match_basic_token(line: &str) -> Option<Token> {
                 ..Default::default()
             })
         },
-        // * | - | +
-        [bytes::UNORDERED_MUL, ..] | 
-        [bytes::UNORDERED_MINUS, ..] |
-        [bytes::UNORDERED_PLUS, ..] => Some(Token {
-            operator: BaseOperator::UnorderedList,
-            content: trimmed_content,
-            ..Default::default()
-        }),
         // `
         [bytes::CODE, ..] => Some(Token {
             operator: BaseOperator::InlineCode,

@@ -76,3 +76,25 @@ fn parse_markdown_ordered_text() {
     assert_eq!(first.operator, BaseOperator::OrderedList);
     assert_eq!(second.operator, BaseOperator::OrderedList);
 }
+
+#[test]
+fn parse_markdown_unordered_text() {
+    let content = "
+        +. Hello
+        -. Panda
+        *. Tiger
+    ";
+
+    let res = lexer::token::get_tokens(content).unwrap();
+    let first = res.get(0).unwrap();
+    let second = res.get(1).unwrap();
+    let third = res.get(2).unwrap();
+
+    assert_eq!(first.operator, BaseOperator::UnorderedList);
+    assert_eq!(second.operator, BaseOperator::UnorderedList);
+    assert_eq!(third.operator, BaseOperator::UnorderedList);
+
+    assert_eq!(first.content, "Hello");
+    assert_eq!(second.content, "Panda");
+    assert_eq!(third.content, "Tiger");
+}
