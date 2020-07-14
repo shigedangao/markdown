@@ -34,3 +34,45 @@ fn parse_markdown_heading_1() {
     assert_eq!(heading.operator, BaseOperator::Heading);
     assert_eq!(metas.heading.as_ref().unwrap(), &heading::HeadingLevel::H1);
 }
+
+#[test]
+fn parse_markdown_heading_all() {
+    let content = "
+        # Heading
+        ## Heading
+        ### Heading
+        #### Heading
+        ##### Heading
+        ###### Heading
+    ";
+
+    let res = lexer::token::get_tokens(content).unwrap();
+    let meta_1: &Meta = res.get(0).unwrap().metas.as_ref().unwrap();
+    let meta_2: &Meta = res.get(1).unwrap().metas.as_ref().unwrap();
+    let meta_3: &Meta = res.get(2).unwrap().metas.as_ref().unwrap();
+    let meta_4: &Meta = res.get(3).unwrap().metas.as_ref().unwrap();
+    let meta_5: &Meta = res.get(4).unwrap().metas.as_ref().unwrap();
+    let meta_6: &Meta = res.get(5).unwrap().metas.as_ref().unwrap();
+
+    assert_eq!(meta_1.heading.as_ref().unwrap(), &heading::HeadingLevel::H1);
+    assert_eq!(meta_2.heading.as_ref().unwrap(), &heading::HeadingLevel::H2);
+    assert_eq!(meta_3.heading.as_ref().unwrap(), &heading::HeadingLevel::H3);
+    assert_eq!(meta_4.heading.as_ref().unwrap(), &heading::HeadingLevel::H4);
+    assert_eq!(meta_5.heading.as_ref().unwrap(), &heading::HeadingLevel::H5);
+    assert_eq!(meta_6.heading.as_ref().unwrap(), &heading::HeadingLevel::H6);
+}
+
+#[test]
+fn parse_markdown_ordered_text() {
+    let content = "
+        1. Hello
+        2. Foo bar
+    ";
+
+    let res = lexer::token::get_tokens(content).unwrap();
+    let first = res.get(0).unwrap();
+    let second = res.get(1).unwrap();
+
+    assert_eq!(first.operator, BaseOperator::OrderedList);
+    assert_eq!(second.operator, BaseOperator::OrderedList);
+}

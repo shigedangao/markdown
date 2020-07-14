@@ -1,5 +1,5 @@
 use std::default::Default;
-use super::{heading, text};
+use super::{heading, text, list};
 use super::operator::bytes;
 use crate::error::LexerError;
 
@@ -22,7 +22,7 @@ impl Default for BaseOperator {
 #[derive(Default, Debug)]
 pub struct Meta {
     pub heading: Option<heading::HeadingLevel>,
-    textMetas: Option<text::TextMetas>
+    text_metas: Option<text::TextMetas>
 }
 
 #[derive(Default, Debug)]
@@ -54,7 +54,7 @@ pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
                 let text_opts = text::get_text_tokens(&t);
                 t.metas = Some(Meta {
                     heading: None,
-                    textMetas: text_opts
+                    text_metas: text_opts
                 });
             }
 
@@ -80,7 +80,7 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return None;
     }
 
-    let ordered_list = get_ordered_list_token(line);
+    let ordered_list = list::get_ordered_list_token(line);
     if ordered_list.is_some() {
         return ordered_list;
     }
@@ -156,35 +156,4 @@ fn trim_matches_content(content: &str) -> String {
 
 
     content.trim_matches(matches).trim().to_string()
-}
- 
-/// Get Ordered List Token
-///
-/// # Description
-/// For the ordered list we need to do more treatment as
-/// we need to see if the preceding character is a number and 
-/// if the next character is a "." 
-///
-/// # Arguments
-/// * `content` &str
-///
-/// # Return
-/// Option<Token>
-fn get_ordered_list_token(content: &str) -> Option<Token> {
-    // match ordered list (i.e: <number>. , 1., 2.)
-    let ordered_list = content.find(|c: char| c.is_numeric() && c > '.');
-    if ordered_list.is_none() {
-        return None;
-    }
-
-    let trimmed_content = content
-        .trim_start_matches(|c: char| c.is_numeric() || c == '.')
-        .trim()
-        .to_string();
-
-    Some(Token {
-        operator: BaseOperator::OrderedList,
-        content: trimmed_content,
-        ..Default::default()
-    })
 }

@@ -1,7 +1,7 @@
 /// Operator
 ///
 /// # Description
-/// List of operaotr available in Markdown
+/// List of operator available in Markdown
 
 pub mod bytes {
     // Operator -> #
