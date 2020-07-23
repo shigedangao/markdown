@@ -1,7 +1,7 @@
+use std::collections::BTreeMap;
 mod lexer;
-mod parser;
 mod error;
-mod test;
+mod tests;
 
 #[cfg(test)]
 mod markdown {
@@ -35,6 +35,16 @@ mod markdown {
     }
 }
 
-pub fn parse_markdown(content: &str) {
-    lexer::token::get_tokens(content);
+/// Parse Markdown
+///
+/// # Description
+/// Wrapper around the lexer::token::get_tokens methods
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// Result<BTreeMap<usize, lexer::token::Token, error::LexerError>>
+pub fn parse_markdown(content: &str) -> Result<BTreeMap<usize, lexer::token::Token>, error::LexerError> {
+    lexer::token::get_tokens(content)
 }

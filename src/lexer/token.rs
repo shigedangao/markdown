@@ -1,4 +1,5 @@
 use std::default::Default;
+use std::collections::BTreeMap;
 use super::{heading, text, list};
 use super::operator::bytes;
 use crate::error::LexerError;
@@ -22,7 +23,7 @@ impl Default for BaseOperator {
 #[derive(Default, Debug)]
 pub struct Meta {
     pub heading: Option<heading::HeadingLevel>,
-    text_metas: Option<text::TextMetas>
+    pub text_metas: Option<text::TextMetas>
 }
 
 #[derive(Default, Debug)]
@@ -42,9 +43,9 @@ pub struct Token {
 /// * `content` &str
 ///
 /// # Return
-/// Result<(), Error>
-pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
-    let mut tokens = Vec::new();
+/// Result<BTreeMap<usize, Token>, Error>
+pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, LexerError> {
+    let mut tokens = BTreeMap::new();
 
     for (idx, line) in content.lines().enumerate() {
         let token = match_basic_token(line.trim());
@@ -58,7 +59,7 @@ pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
                 });
             }
 
-            tokens.push(t);
+            tokens.insert(idx, t);
         }
     }
 

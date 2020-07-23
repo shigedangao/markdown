@@ -21,7 +21,7 @@
 /// - ~~...~~ -> strikethrought
 /// - []() -> link
 /// - ![]() -> image
-mod external;
+pub mod external;
 pub mod heading;
 mod list;
 mod operator;

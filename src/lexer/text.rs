@@ -13,17 +13,17 @@ lazy_static!{
 /// TextMetas
 #[derive(Debug)]
 pub struct TextMetas {
-    images: Option<Vec<external::ImageMeta>>,
-    links: Option<Vec<external::LinkMeta>>,
-    bold: Option<Vec<TextOption>>,
-    italic: Option<Vec<TextOption>>,
-    strike: Option<Vec<TextOption>>
+    pub images: Option<Vec<external::ImageMeta>>,
+    pub links: Option<Vec<external::LinkMeta>>,
+    pub bold: Option<Vec<TextOption>>,
+    pub italic: Option<Vec<TextOption>>,
+    pub strike: Option<Vec<TextOption>>
 }
 
 #[derive(Debug)]
 pub struct TextOption {
-    word: String,
-    col: Option<usize>
+    pub word: String,
+    pub col: Option<usize>
 }
 
 /// Get Test Tokens
@@ -65,9 +65,9 @@ pub fn get_text_tokens(token: &Token) -> Option<TextMetas> {
 /// Option<Vec<TextOption>>
 fn get_kind_content(content: &String, pattern: &str, re: &Regex) -> Option<Vec<TextOption>> {
     let captures = re.captures_iter(content);
-
     let k: Vec<TextOption> = captures
         .map(|c| {
+            // Index 2 is the content of the capture
             let word = c.get(2).unwrap().as_str();
 
             TextOption {

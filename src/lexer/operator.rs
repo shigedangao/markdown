@@ -20,7 +20,7 @@ pub mod bytes {
 
 pub mod pattern {
     // TextOperator -> ~~
-    pub const BOLD: &str = "~~";
+    pub const BOLD: &str = "**";
     // TextOperator -> *
     pub const ITALIC: &str = "*";
     // TextOperator -> ~~
