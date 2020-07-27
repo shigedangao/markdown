@@ -1,7 +1,7 @@
 /// Operator
 ///
 /// # Description
-/// List of operaotr available in Markdown
+/// List of operator available in Markdown
 
 pub mod bytes {
     // Operator -> #
@@ -20,7 +20,7 @@ pub mod bytes {
 
 pub mod pattern {
     // TextOperator -> ~~
-    pub const BOLD: &str = "~~";
+    pub const BOLD: &str = "**";
     // TextOperator -> *
     pub const ITALIC: &str = "*";
     // TextOperator -> ~~

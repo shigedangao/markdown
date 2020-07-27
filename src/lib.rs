@@ -1,10 +1,11 @@
-mod lexer;
+use std::collections::BTreeMap;
 mod parser;
 mod error;
+mod tests;
 
 #[cfg(test)]
 mod markdown {
-    use crate::lexer;
+    use crate::parser;
 
     #[test]
     fn parse_markdown() {
@@ -29,12 +30,21 @@ mod markdown {
             I'm a **little** sick a *little*
         ";
 
-        let res = lexer::token::get_tokens(content);
-        print!("{:?}", res);
+        let res = parser::token::get_tokens(content);
         assert!(!res.is_err());
     }
 }
 
-pub fn parse_markdown(content: &str) {
-    lexer::token::get_tokens(content);
+/// Parse Markdown
+///
+/// # Description
+/// Wrapper around the lexer::token::get_tokens methods
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// Result<BTreeMap<usize, lexer::token::Token, error::ParserError>>
+pub fn parse_markdown(content: &str) -> Result<BTreeMap<usize, parser::token::Token>, error::ParserError> {
+    parser::token::get_tokens(content)
 }

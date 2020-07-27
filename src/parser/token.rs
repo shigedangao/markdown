@@ -1,7 +1,8 @@
 use std::default::Default;
-use super::{heading, text};
+use std::collections::BTreeMap;
+use super::{heading, text, list};
 use super::operator::bytes;
-use crate::error::LexerError;
+use crate::error::ParserError;
 
 const MIN_CHAR_LENGTH: usize = 2;
 
@@ -21,7 +22,8 @@ impl Default for BaseOperator {
 
 #[derive(Default, Debug)]
 pub struct Meta {
-    Heading: Option<heading::HeadingLevel>
+    pub heading: Option<heading::HeadingLevel>,
+    pub text_metas: Option<text::TextMetas>
 }
 
 #[derive(Default, Debug)]
@@ -41,21 +43,23 @@ pub struct Token {
 /// * `content` &str
 ///
 /// # Return
-/// Result<(), Error>
-pub fn get_tokens(content: &str) -> Result<Vec<Token>, LexerError> {
-    let mut tokens = Vec::new();
+/// Result<BTreeMap<usize, Token>, Error>
+pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, ParserError> {
+    let mut tokens = BTreeMap::new();
 
     for (idx, line) in content.lines().enumerate() {
         let token = match_basic_token(line.trim());
         if let Some(mut t) = token {
             t.line = idx;
-            tokens.push(t);
-        }
-    }
+            if t.operator == BaseOperator::Text {
+                let text_opts = text::get_text_tokens(&t);
+                t.metas = Some(Meta {
+                    heading: None,
+                    text_metas: text_opts
+                });
+            }
 
-    for token in &tokens {
-        if token.operator == BaseOperator::Text {
-            text::get_text_tokens(token);
+            tokens.insert(idx, t);
         }
     }
 
@@ -77,9 +81,14 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return None;
     }
 
-    let ordered_list = get_ordered_list_token(line);
+    let ordered_list = list::get_ordered_list_token(line);
     if ordered_list.is_some() {
         return ordered_list;
+    }
+
+    let unordered_list = list::get_unordered_list_token(line);
+    if unordered_list.is_some() {
+        return unordered_list;
     }
 
     let trimmed_content = trim_matches_content(line);
@@ -97,20 +106,12 @@ fn match_basic_token(line: &str) -> Option<Token> {
                 operator: BaseOperator::Heading,
                 content: trimmed_content,
                 metas: Some(Meta {
-                    Heading: Some(depth),
+                    heading: Some(depth),
                     ..Default::default()
                 }),
                 ..Default::default()
             })
         },
-        // * | - | +
-        [bytes::UNORDERED_MUL, ..] | 
-        [bytes::UNORDERED_MINUS, ..] |
-        [bytes::UNORDERED_PLUS, ..] => Some(Token {
-            operator: BaseOperator::UnorderedList,
-            content: trimmed_content,
-            ..Default::default()
-        }),
         // `
         [bytes::CODE, ..] => Some(Token {
             operator: BaseOperator::InlineCode,
@@ -153,35 +154,4 @@ fn trim_matches_content(content: &str) -> String {
 
 
     content.trim_matches(matches).trim().to_string()
-}
- 
-/// Get Ordered List Token
-///
-/// # Description
-/// For the ordered list we need to do more treatment as
-/// we need to see if the preceding character is a number and 
-/// if the next character is a "." 
-///
-/// # Arguments
-/// * `content` &str
-///
-/// # Return
-/// Option<Token>
-fn get_ordered_list_token(content: &str) -> Option<Token> {
-    // match ordered list (i.e: <number>. , 1., 2.)
-    let ordered_list = content.find(|c: char| c.is_numeric() && c > '.');
-    if ordered_list.is_none() {
-        return None;
-    }
-
-    let trimmed_content = content
-        .trim_start_matches(|c: char| c.is_numeric() || c == '.')
-        .trim()
-        .to_string();
-
-    Some(Token {
-        operator: BaseOperator::OrderedList,
-        content: trimmed_content,
-        ..Default::default()
-    })
 }
