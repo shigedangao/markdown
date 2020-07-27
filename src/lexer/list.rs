@@ -4,8 +4,8 @@ use super::token::{Token, BaseOperator};
 
 
 lazy_static!{
-    static ref ORDERED_LIST: Regex = Regex::new(r"([1-9]\.)").unwrap();
-    static ref UNORDED_LIST: Regex = Regex::new(r"(\+\.)|(\*\.)|(\-\.)").unwrap();
+    static ref ORDERED_LIST: Regex = Regex::new(r"^([1-9]\.)").unwrap();
+    static ref UNORDED_LIST: Regex = Regex::new(r"^(\+\.)|(\*\.)|(\-\.)").unwrap();
 }
 
 /// Get Ordered List

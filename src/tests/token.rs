@@ -212,7 +212,7 @@ fn parse_images_within_content() {
 #[test]
 fn parse_text_style() {
     let content = "
-        This is a ~~strike~~ *text* lol
+        This is a ~~strike~~ *text* lol 
         ha **End** ha
     ";
 
