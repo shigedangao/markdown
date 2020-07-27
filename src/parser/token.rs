@@ -2,7 +2,7 @@ use std::default::Default;
 use std::collections::BTreeMap;
 use super::{heading, text, list};
 use super::operator::bytes;
-use crate::error::LexerError;
+use crate::error::ParserError;
 
 const MIN_CHAR_LENGTH: usize = 2;
 
@@ -44,7 +44,7 @@ pub struct Token {
 ///
 /// # Return
 /// Result<BTreeMap<usize, Token>, Error>
-pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, LexerError> {
+pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, ParserError> {
     let mut tokens = BTreeMap::new();
 
     for (idx, line) in content.lines().enumerate() {

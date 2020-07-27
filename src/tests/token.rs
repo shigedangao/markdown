@@ -1,7 +1,6 @@
-use crate::lexer;
-use crate::lexer::token::{Token, BaseOperator, Meta};
-use crate::lexer::external::{LinkMeta};
-use crate::lexer::heading;
+use crate::parser::token::{Token, BaseOperator, Meta};
+use crate::parser::external::{LinkMeta};
+use crate::parser::{heading, token};
 
 #[test]
 fn parse_markdown_blockquote() {
@@ -10,7 +9,7 @@ fn parse_markdown_blockquote() {
         I love eating baozi
     ";
 
-    let res = lexer::token::get_tokens(content);
+    let res = token::get_tokens(content);
     let token = res.unwrap();
 
     let blockquote: &Token = token.get(&1).unwrap();
@@ -27,7 +26,7 @@ fn parse_markdown_heading_1() {
         # Heading
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let heading: &Token = res.get(&1).unwrap();
 
     let metas = heading.metas.as_ref().unwrap();
@@ -47,7 +46,7 @@ fn parse_markdown_heading_all() {
         ###### Heading
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let meta_1: &Meta = res.get(&1).unwrap().metas.as_ref().unwrap();
     let meta_2: &Meta = res.get(&2).unwrap().metas.as_ref().unwrap();
     let meta_3: &Meta = res.get(&3).unwrap().metas.as_ref().unwrap();
@@ -70,7 +69,7 @@ fn parse_markdown_ordered_text() {
         2. Foo bar
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let first = res.get(&1).unwrap();
     let second = res.get(&2).unwrap();
 
@@ -86,7 +85,7 @@ fn parse_markdown_unordered_text() {
         *. Tiger
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let first = res.get(&1).unwrap();
     let second = res.get(&2).unwrap();
     let third = res.get(&3).unwrap();
@@ -107,7 +106,7 @@ fn parse_links() {
         [hello](you)
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let first_link = res.get(&1).unwrap();
     let second_link = res.get(&2).unwrap();
 
@@ -146,7 +145,7 @@ fn parse_links_in_text() {
         Hello from Taiwan here is the link of my [trip](https://link.foo)
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let line = res.get(&1).unwrap();
 
     assert_eq!(line.operator, BaseOperator::Text);
@@ -169,7 +168,7 @@ fn parse_images() {
         ![a chinese temple](https://chinese-temple.com)
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let image = res.get(&1).unwrap();
 
     assert_eq!(image.operator, BaseOperator::Text);
@@ -193,7 +192,7 @@ fn parse_images_within_content() {
         here is an image within this text ![bugcat capoo](貓貓)
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let image = res.get(&2).unwrap();
 
     assert_eq!(image.operator, BaseOperator::Text);
@@ -216,7 +215,7 @@ fn parse_text_style() {
         ha **End** ha
     ";
 
-    let res = lexer::token::get_tokens(content).unwrap();
+    let res = token::get_tokens(content).unwrap();
     let first_line = res.get(&1).unwrap();
 
     let first_line_text_metas = first_line
