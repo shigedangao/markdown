@@ -1,9 +1,10 @@
 use std::default::Default;
 use std::collections::BTreeMap;
-use super::{heading, text, list};
+use super::{heading, text, list, code};
 use super::operator::bytes;
 use crate::error::ParserError;
 
+// Minimum character length
 const MIN_CHAR_LENGTH: usize = 2;
 
 #[derive(Debug, PartialEq)]
@@ -11,8 +12,10 @@ pub enum BaseOperator {
     Heading,
     UnorderedList,
     OrderedList,
-    InlineCode,
     BlockQuotes,
+    BlockCodeStart,
+    BlockCodeContent,
+    BlockCodeEnd,
     Text
 }
 
@@ -81,18 +84,17 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return None;
     }
 
-    let ordered_list = list::get_ordered_list_token(line);
-    if ordered_list.is_some() {
-        return ordered_list;
+    let list = list::get_any_list(line);
+    if list.is_some() {
+        return list;
     }
 
-    let unordered_list = list::get_unordered_list_token(line);
-    if unordered_list.is_some() {
-        return unordered_list;
+    let code_token = code::get_block_code_token(line);
+    if code_token.is_some() {
+        return code_token;
     }
 
     let trimmed_content = trim_matches_content(line);
-    
     // We only want to match for the few characters at the beginning
     let start_chars = line.split_at(MIN_CHAR_LENGTH);
     // match each byte of the byte array
@@ -112,12 +114,6 @@ fn match_basic_token(line: &str) -> Option<Token> {
                 ..Default::default()
             })
         },
-        // `
-        [bytes::CODE, ..] => Some(Token {
-            operator: BaseOperator::InlineCode,
-            content: trimmed_content,
-            ..Default::default()
-        }),
         // >
         [bytes::BLOCKQUOTE, ..] => Some(Token {
             operator: BaseOperator::BlockQuotes,
@@ -148,7 +144,6 @@ fn trim_matches_content(content: &str) -> String {
         bytes::UNORDERED_MUL as char,
         bytes::UNORDERED_MINUS as char,
         bytes::UNORDERED_PLUS as char,
-        bytes::CODE as char,
         bytes::BLOCKQUOTE as char
     ];
 

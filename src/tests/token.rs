@@ -258,3 +258,34 @@ fn parse_text_style() {
     assert_eq!(bold_vec[0].word, "End");
     assert_eq!(bold_vec[0].col.unwrap(), 3);
 }
+
+#[test]
+fn parse_block_code_content() {
+    let content = "
+        ```rust
+        fn main() {
+            println!('hello')
+        } 
+        ```
+    ";
+
+    let res = token::get_tokens(content).unwrap();
+    println!("{:?}", res);
+
+
+    let code_header = res.get(&1).unwrap();
+    assert_eq!(code_header.operator, BaseOperator::BlockCodeStart);
+    assert_eq!(code_header.content, "```rust");
+
+    let code_content_fn = res.get(&2).unwrap();
+    assert_eq!(code_content_fn.operator, BaseOperator::BlockCodeContent);
+    assert_eq!(code_content_fn.content, "fn main() {");
+
+    let code_content_body = res.get(&3).unwrap();
+    assert_eq!(code_content_body.operator, BaseOperator::BlockCodeContent);
+    assert_eq!(code_content_body.content, "println!('hello')");
+
+    let code_footer = res.get(&5).unwrap();
+    assert_eq!(code_footer.operator, BaseOperator::BlockCodeEnd);
+    assert_eq!(code_footer.content, "```");
+}

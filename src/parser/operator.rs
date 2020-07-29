@@ -12,8 +12,6 @@ pub mod bytes {
     pub const UNORDERED_MINUS: u8 = 45;
     // Operator -> +
     pub const UNORDERED_PLUS: u8 = 43;
-    // Operator -> `
-    pub const CODE: u8 = 96;
     // Operator -> >
     pub const BLOCKQUOTE: u8 = 62;
 }

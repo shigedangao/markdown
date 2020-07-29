@@ -8,6 +8,30 @@ lazy_static!{
     static ref UNORDED_LIST: Regex = Regex::new(r"^(\+\.)|(\*\.)|(\-\.)").unwrap();
 }
 
+/// Get Any List
+///
+/// # Description
+/// Decorator over the <kind>_ list method
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// Option<Token>
+pub fn get_any_list(content: &str) -> Option<Token> {
+    let unordered_list = get_unordered_list_token(content);
+    if unordered_list.is_some() {
+        return unordered_list;
+    }
+
+    let ordered_list = get_ordered_list_token(content);
+    if ordered_list.is_some() {
+        return ordered_list;
+    }
+
+    None
+}
+
 /// Get Ordered List
 ///
 /// # Description
@@ -18,7 +42,7 @@ lazy_static!{
 ///
 /// # Return
 /// Option<Token>
-pub fn get_ordered_list_token(content: &str) -> Option<Token> {
+fn get_ordered_list_token(content: &str) -> Option<Token> {
     let has = ORDERED_LIST.is_match(content);
     if !has {
         return None;
@@ -46,7 +70,7 @@ pub fn get_ordered_list_token(content: &str) -> Option<Token> {
 ///
 /// # Return
 /// Option<Token>
-pub fn get_unordered_list_token(content: &str) -> Option<Token> {
+fn get_unordered_list_token(content: &str) -> Option<Token> {
     let has = UNORDED_LIST.is_match(content);
     if !has {
         return None;
