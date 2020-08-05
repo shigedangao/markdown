@@ -1,3 +1,4 @@
+use std::clone::Clone;
 use regex::Regex;
 use lazy_static::lazy_static;
 
@@ -8,13 +9,13 @@ lazy_static!{
     static ref IMG_RE: Regex = Regex::new(r"!\[(.*?)\]\((.*?)\)").unwrap();
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LinkMeta {
     pub title: String,
     pub url: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ImageMeta {
     pub alt_text: String,
     pub url: String

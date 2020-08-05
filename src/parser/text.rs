@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::clone::Clone;
 use lazy_static::lazy_static;
 use super::token::Token;
 use super::external;
@@ -11,7 +12,7 @@ lazy_static!{
 }
 
 /// TextMetas
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextMetas {
     pub images: Option<Vec<external::ImageMeta>>,
     pub links: Option<Vec<external::LinkMeta>>,
@@ -20,7 +21,7 @@ pub struct TextMetas {
     pub strike: Option<Vec<TextOption>>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextOption {
     pub word: String,
     pub col: Option<usize>

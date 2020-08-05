@@ -270,8 +270,6 @@ fn parse_block_code_content() {
     ";
 
     let res = token::get_tokens(content).unwrap();
-    println!("{:?}", res);
-
 
     let code_header = res.get(&1).unwrap();
     assert_eq!(code_header.operator, BaseOperator::BlockCodeStart);

@@ -1,4 +1,5 @@
 use std::default::Default;
+use std::clone::Clone;
 use std::collections::BTreeMap;
 use super::{heading, text, list, code};
 use super::operator::bytes;
@@ -7,7 +8,7 @@ use crate::error::ParserError;
 // Minimum character length
 const MIN_CHAR_LENGTH: usize = 2;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum BaseOperator {
     Heading,
     UnorderedList,
@@ -23,13 +24,13 @@ impl Default for BaseOperator {
     fn default() -> Self { BaseOperator::Text }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Meta {
     pub heading: Option<heading::HeadingLevel>,
     pub text_metas: Option<text::TextMetas>
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Token { 
     pub line: usize,
     pub content: String,
@@ -49,9 +50,10 @@ pub struct Token {
 /// Result<BTreeMap<usize, Token>, Error>
 pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, ParserError> {
     let mut tokens = BTreeMap::new();
+    let mut previous_token: Option<Token> = None;
 
     for (idx, line) in content.lines().enumerate() {
-        let token = match_basic_token(line.trim());
+        let token = match_basic_token(line.trim(), &previous_token);
         if let Some(mut t) = token {
             t.line = idx;
             if t.operator == BaseOperator::Text {
@@ -62,6 +64,7 @@ pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, ParserError> 
                 });
             }
 
+            previous_token = Some(t.clone());
             tokens.insert(idx, t);
         }
     }
@@ -79,7 +82,7 @@ pub fn get_tokens(content: &str) -> Result<BTreeMap<usize, Token>, ParserError> 
 ///
 /// # Return
 /// Option<Token>
-fn match_basic_token(line: &str) -> Option<Token> {
+fn match_basic_token(line: &str, previous_token: &Option<Token>) -> Option<Token> {
     if line.len() < MIN_CHAR_LENGTH {
         return None;
     }
@@ -89,7 +92,7 @@ fn match_basic_token(line: &str) -> Option<Token> {
         return list;
     }
 
-    let code_token = code::get_block_code_token(line);
+    let code_token = code::get_block_code_token(line, previous_token);
     if code_token.is_some() {
         return code_token;
     }
