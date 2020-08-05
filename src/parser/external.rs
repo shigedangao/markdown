@@ -33,7 +33,7 @@ pub struct ImageMeta {
 ///
 /// # Return
 /// * `Option<Vec<LinkMeta>>`
-pub fn get_link_metas(content: &String, images: &Option<Vec<ImageMeta>>) -> Option<Vec<LinkMeta>> {
+pub fn get_link_metas(content: &str, images: &Option<Vec<ImageMeta>>) -> Option<Vec<LinkMeta>> {
     let captures = LINK_RE.captures_iter(content);
     let mut imgs = &Vec::new();
     
@@ -74,7 +74,7 @@ pub fn get_link_metas(content: &String, images: &Option<Vec<ImageMeta>>) -> Opti
 ///
 /// # Return
 /// Option<Vec<ImageMeta>>
-pub fn get_image_metas(content: &String) -> Option<Vec<ImageMeta>> {
+pub fn get_image_metas(content: &str) -> Option<Vec<ImageMeta>> {
     let captures = IMG_RE.captures_iter(content);
 
     let images: Vec<ImageMeta> = captures

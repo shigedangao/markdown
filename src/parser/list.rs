@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-use super::token::{Token, BaseOperator};
+use crate::token::tag::{TagToken, TagOperator};
 
 
 lazy_static!{
@@ -17,8 +17,8 @@ lazy_static!{
 /// * `content` &str
 ///
 /// # Return
-/// Option<Token>
-pub fn get_any_list(content: &str) -> Option<Token> {
+/// Option<TagToken>
+pub fn get_any_list(content: &str) -> Option<TagToken> {
     let unordered_list = get_unordered_list_token(content);
     if unordered_list.is_some() {
         return unordered_list;
@@ -41,8 +41,8 @@ pub fn get_any_list(content: &str) -> Option<Token> {
 /// * `content` &str
 ///
 /// # Return
-/// Option<Token>
-fn get_ordered_list_token(content: &str) -> Option<Token> {
+/// Option<TagToken>
+fn get_ordered_list_token(content: &str) -> Option<TagToken> {
     let has = ORDERED_LIST.is_match(content);
     if !has {
         return None;
@@ -53,14 +53,16 @@ fn get_ordered_list_token(content: &str) -> Option<Token> {
         .trim()
         .to_string();
 
-    Some(Token {
-        operator: BaseOperator::OrderedList,
-        content: trimmed_content,
-        ..Default::default()
-    })
+    Some(
+        TagToken {
+            operator: TagOperator::OrderedList,
+            content: trimmed_content,
+            ..Default::default()
+        }
+    )
 }
 
-/// Get Unordered List Token
+/// Get Unordered List TagToken
 ///
 /// # Description
 /// Get unordered list tokens
@@ -69,8 +71,8 @@ fn get_ordered_list_token(content: &str) -> Option<Token> {
 /// * `content` &str
 ///
 /// # Return
-/// Option<Token>
-fn get_unordered_list_token(content: &str) -> Option<Token> {
+/// Option<TagToken>
+fn get_unordered_list_token(content: &str) -> Option<TagToken> {
     let has = UNORDED_LIST.is_match(content);
     if !has {
         return None;
@@ -79,8 +81,8 @@ fn get_unordered_list_token(content: &str) -> Option<Token> {
     let trimmed = UNORDED_LIST.replace_all(content, "");
 
     Some(
-        Token {
-            operator: BaseOperator::UnorderedList,
+        TagToken {
+            operator: TagOperator::UnorderedList,
             content: trimmed.as_ref().trim().to_string(),
             ..Default::default()
         }
