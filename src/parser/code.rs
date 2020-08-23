@@ -39,8 +39,7 @@ pub fn get_block_code_operator(content: &str, previous_token: &Option<CodeToken>
 
     if let Some(ptoken) = previous_token {
         // Match if we detect a new block code
-        if !matches && ptoken.operator == CodeOperator::BlockCodeStart ||
-            !matches && ptoken.operator == CodeOperator::BlockCodeContent {
+        if (ptoken.operator == CodeOperator::BlockCodeContent || ptoken.operator == CodeOperator::BlockCodeStart) && !matches {
             return Some(CodeOperator::BlockCodeContent);
         }
 

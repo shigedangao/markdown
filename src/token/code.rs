@@ -39,8 +39,7 @@ pub fn get_code_block_tokens(content: &str) -> BTreeMap<usize, CodeToken> {
                 line: idx,
                 content: line.trim().to_string(),
                 metas: None,
-                operator: op,
-                ..Default::default()
+                operator: op
             };
 
             previous_token = Some(token.clone());

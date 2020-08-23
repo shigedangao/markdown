@@ -57,7 +57,7 @@ pub fn get_link_metas(content: &str, images: &Option<Vec<ImageMeta>>) -> Option<
         })
         .collect();
 
-    if links.len() == 0 {
+    if links.is_empty() {
         return None;
     }
 
@@ -89,7 +89,7 @@ pub fn get_image_metas(content: &str) -> Option<Vec<ImageMeta>> {
         })
         .collect();
 
-    if images.len() == 0 {
+    if images.is_empty(){
         return None;
     }
 
@@ -116,7 +116,7 @@ fn is_not_image(images: &Vec<ImageMeta>, link_title: &str, link_url: &str) -> bo
         .filter(|img| img.url == link_url && img.alt_text == link_title)
         .collect();
 
-    if images.len() == 0 {
+    if images.is_empty() {
         return true;
     }
 

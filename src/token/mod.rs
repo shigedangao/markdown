@@ -24,7 +24,7 @@ pub struct TextualToken {
 /// # Return
 /// Result<BTreeMap<usize, TextualToken>, ParserError>
 pub fn get_textual_tokens(content: &str) -> Result<BTreeMap<usize, TextualToken>, error::ParserError> {
-    if content.len() == 0 {
+    if content.is_empty() {
         return Err(error::ParserError{message: error::EMPTY_CONTENT.to_string()});
     }
 
@@ -60,7 +60,7 @@ pub fn get_textual_tokens(content: &str) -> Result<BTreeMap<usize, TextualToken>
 /// # Return
 /// Result<BTreeMap<usize, CodeToken>, ParseError> 
 pub fn get_code_tokens(content: &str) -> Result<BTreeMap<usize, CodeToken>, error::ParserError> {
-    if content.len() == 0 {
+    if content.is_empty() {
         return Err(error::ParserError{message: error::EMPTY_CONTENT.to_string()});
     }
     

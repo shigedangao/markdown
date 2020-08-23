@@ -80,7 +80,7 @@ fn get_kind_content(content: &str, pattern: &str, re: &Regex) -> Option<Vec<Text
         })
         .collect();
 
-    if k.len() == 0 {
+    if k.is_empty() {
         return None;
     }
 
