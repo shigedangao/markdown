@@ -1,6 +1,5 @@
 use regex::Regex;
 use lazy_static::lazy_static;
-use super::token::Token;
 use super::external;
 use super::operator::pattern;
 
@@ -8,6 +7,13 @@ lazy_static!{
     static ref STRIKE_RE: Regex = Regex::new(r"(\~\~(.*?)\~\~)").unwrap();
     static ref BOLD_RE: Regex = Regex::new(r"(\*\*(.*?)\*\*)").unwrap();
     static ref ITALIC_RE: Regex = Regex::new(r"(\*(.*?)\*)").unwrap();
+    static ref INLINE_CODE: Regex = Regex::new(r"(`([a-z].*)`)").unwrap();
+}
+
+#[derive(Debug)]
+pub struct TextOption {
+    pub word: String,
+    pub col: Option<usize>
 }
 
 /// TextMetas
@@ -17,36 +23,33 @@ pub struct TextMetas {
     pub links: Option<Vec<external::LinkMeta>>,
     pub bold: Option<Vec<TextOption>>,
     pub italic: Option<Vec<TextOption>>,
-    pub strike: Option<Vec<TextOption>>
+    pub strike: Option<Vec<TextOption>>,
+    pub inline_code: Option<Vec<TextOption>>
 }
 
-#[derive(Debug)]
-pub struct TextOption {
-    pub word: String,
-    pub col: Option<usize>
-}
-
-/// Get Test Tokens
+/// Get Test Metas
 ///
 /// # Description
 /// Get token for text object
 ///
 /// # Arguments
 /// * TextMetas
-pub fn get_text_tokens(token: &Token) -> Option<TextMetas> {
+pub fn get_text_metas(content: &str) -> Option<TextMetas> {
     // get images token
-    let images = external::get_image_metas(&token.content);
-    let links = external::get_link_metas(&token.content, &images);
-    let strike = get_kind_content(&token.content, pattern::STRIKE, &STRIKE_RE);
-    let bold = get_kind_content(&token.content, pattern::BOLD, &BOLD_RE);
-    let italic = get_kind_content(&token.content, pattern::ITALIC, &ITALIC_RE);
+    let images = external::get_image_metas(content);
+    let links = external::get_link_metas(content, &images);
+    let strike = get_kind_content(content, pattern::STRIKE, &STRIKE_RE);
+    let bold = get_kind_content(content, pattern::BOLD, &BOLD_RE);
+    let italic = get_kind_content(content, pattern::ITALIC, &ITALIC_RE);
+    let inline_code = get_kind_content(content, pattern::CODE_PATTERN, &INLINE_CODE);
 
     Some(TextMetas {
         images,
         links,
         bold,
         italic,
-        strike
+        strike,
+        inline_code
     })
 
 }
@@ -63,7 +66,7 @@ pub fn get_text_tokens(token: &Token) -> Option<TextMetas> {
 ///
 /// # Return
 /// Option<Vec<TextOption>>
-fn get_kind_content(content: &String, pattern: &str, re: &Regex) -> Option<Vec<TextOption>> {
+fn get_kind_content(content: &str, pattern: &str, re: &Regex) -> Option<Vec<TextOption>> {
     let captures = re.captures_iter(content);
     let k: Vec<TextOption> = captures
         .map(|c| {
@@ -87,7 +90,7 @@ fn get_kind_content(content: &String, pattern: &str, re: &Regex) -> Option<Vec<T
 /// Get Indices
 ///
 /// # Description
-/// Return the first index of the word that is match
+/// Return the first index of the word that is match. This is use to retrieve the column index
 ///
 /// # Arguments
 /// * `pattern` &str

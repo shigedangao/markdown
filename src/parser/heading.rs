@@ -1,7 +1,8 @@
 use std::default::Default;
+use std::clone::Clone;
 
 /// Heading LEvel
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum HeadingLevel {
     H1,
     H2,

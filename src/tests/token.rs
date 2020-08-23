@@ -1,6 +1,8 @@
-use crate::parser::token::{Token, BaseOperator, Meta};
-use crate::parser::external::{LinkMeta};
-use crate::parser::{heading, token};
+use crate::token;
+use crate::token::text::{TextToken};
+use crate::token::tag::{TagToken, TagOperator, TagMeta};
+use crate::parser::heading;
+use crate::parser::code::CodeOperator;
 
 #[test]
 fn parse_markdown_blockquote() {
@@ -9,13 +11,13 @@ fn parse_markdown_blockquote() {
         I love eating baozi
     ";
 
-    let res = token::get_tokens(content);
+    let res = token::get_textual_tokens(content);
     let token = res.unwrap();
 
-    let blockquote: &Token = token.get(&1).unwrap();
+    let blockquote: &TagToken = token.get(&1).unwrap().tag.as_ref().unwrap();
     
-    assert_eq!(blockquote.line, 1);
-    assert_eq!(blockquote.operator, BaseOperator::BlockQuotes);
+    assert_eq!(blockquote.line, 0);
+    assert_eq!(blockquote.operator, TagOperator::BlockQuotes);
     assert_eq!(blockquote.content, "Hello my name is xiao");
     assert!(blockquote.metas.is_none());
 }
@@ -26,13 +28,13 @@ fn parse_markdown_heading_1() {
         # Heading
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let heading: &Token = res.get(&1).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let heading: &TagToken = res.get(&1).unwrap().tag.as_ref().unwrap();
 
     let metas = heading.metas.as_ref().unwrap();
     
-    assert_eq!(heading.operator, BaseOperator::Heading);
-    assert_eq!(metas.heading.as_ref().unwrap(), &heading::HeadingLevel::H1);
+    assert_eq!(heading.operator, TagOperator::Heading);
+    assert_eq!(metas.heading_kind, heading::HeadingLevel::H1);
 }
 
 #[test]
@@ -46,20 +48,20 @@ fn parse_markdown_heading_all() {
         ###### Heading
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let meta_1: &Meta = res.get(&1).unwrap().metas.as_ref().unwrap();
-    let meta_2: &Meta = res.get(&2).unwrap().metas.as_ref().unwrap();
-    let meta_3: &Meta = res.get(&3).unwrap().metas.as_ref().unwrap();
-    let meta_4: &Meta = res.get(&4).unwrap().metas.as_ref().unwrap();
-    let meta_5: &Meta = res.get(&5).unwrap().metas.as_ref().unwrap();
-    let meta_6: &Meta = res.get(&6).unwrap().metas.as_ref().unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let meta_1: &TagMeta = res.get(&1).unwrap().tag.as_ref().unwrap().metas.as_ref().unwrap();
+    let meta_2: &TagMeta = res.get(&2).unwrap().tag.as_ref().unwrap().metas.as_ref().unwrap();
+    let meta_3: &TagMeta = res.get(&3).unwrap().tag.as_ref().unwrap().metas.as_ref().unwrap();
+    let meta_4: &TagMeta = res.get(&4).unwrap().tag.as_ref().unwrap().metas.as_ref().unwrap();
+    let meta_5: &TagMeta = res.get(&5).unwrap().tag.as_ref().unwrap().metas.as_ref().unwrap();
+    let meta_6: &TagMeta = res.get(&6).unwrap().tag.as_ref().unwrap().metas.as_ref().unwrap();
 
-    assert_eq!(meta_1.heading.as_ref().unwrap(), &heading::HeadingLevel::H1);
-    assert_eq!(meta_2.heading.as_ref().unwrap(), &heading::HeadingLevel::H2);
-    assert_eq!(meta_3.heading.as_ref().unwrap(), &heading::HeadingLevel::H3);
-    assert_eq!(meta_4.heading.as_ref().unwrap(), &heading::HeadingLevel::H4);
-    assert_eq!(meta_5.heading.as_ref().unwrap(), &heading::HeadingLevel::H5);
-    assert_eq!(meta_6.heading.as_ref().unwrap(), &heading::HeadingLevel::H6);
+    assert_eq!(meta_1.heading_kind, heading::HeadingLevel::H1);
+    assert_eq!(meta_2.heading_kind, heading::HeadingLevel::H2);
+    assert_eq!(meta_3.heading_kind, heading::HeadingLevel::H3);
+    assert_eq!(meta_4.heading_kind, heading::HeadingLevel::H4);
+    assert_eq!(meta_5.heading_kind, heading::HeadingLevel::H5);
+    assert_eq!(meta_6.heading_kind, heading::HeadingLevel::H6);
 }
 
 #[test]
@@ -69,12 +71,12 @@ fn parse_markdown_ordered_text() {
         2. Foo bar
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let first = res.get(&1).unwrap();
-    let second = res.get(&2).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let first = res.get(&1).unwrap().tag.as_ref().unwrap();
+    let second = res.get(&2).unwrap().tag.as_ref().unwrap();
 
-    assert_eq!(first.operator, BaseOperator::OrderedList);
-    assert_eq!(second.operator, BaseOperator::OrderedList);
+    assert_eq!(first.operator, TagOperator::OrderedList);
+    assert_eq!(second.operator, TagOperator::OrderedList);
 }
 
 #[test]
@@ -85,14 +87,14 @@ fn parse_markdown_unordered_text() {
         *. Tiger
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let first = res.get(&1).unwrap();
-    let second = res.get(&2).unwrap();
-    let third = res.get(&3).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let first = res.get(&1).unwrap().tag.as_ref().unwrap();
+    let second = res.get(&2).unwrap().tag.as_ref().unwrap();
+    let third = res.get(&3).unwrap().tag.as_ref().unwrap();
 
-    assert_eq!(first.operator, BaseOperator::UnorderedList);
-    assert_eq!(second.operator, BaseOperator::UnorderedList);
-    assert_eq!(third.operator, BaseOperator::UnorderedList);
+    assert_eq!(first.operator, TagOperator::UnorderedList);
+    assert_eq!(second.operator, TagOperator::UnorderedList);
+    assert_eq!(third.operator, TagOperator::UnorderedList);
 
     assert_eq!(first.content, "Hello");
     assert_eq!(second.content, "Panda");
@@ -106,21 +108,15 @@ fn parse_links() {
         [hello](you)
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let first_link = res.get(&1).unwrap();
-    let second_link = res.get(&2).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let first_link = res.get(&1).unwrap().text.as_ref().unwrap();
+    let second_link = res.get(&2).unwrap().text.as_ref().unwrap();
 
-    assert_eq!(first_link.operator, BaseOperator::Text);
-    assert_eq!(second_link.operator, BaseOperator::Text);
-
-    assert!(first_link.metas.as_ref().unwrap().text_metas.is_some());
-    assert!(second_link.metas.as_ref().unwrap().text_metas.is_some());
+    assert!(first_link.metas.is_some());
+    assert!(second_link.metas.is_some());
 
     let first_link_metas = first_link
         .metas
-        .as_ref()
-        .unwrap()
-        .text_metas
         .as_ref()
         .unwrap();
 
@@ -129,9 +125,6 @@ fn parse_links() {
 
     let second_link_metas = second_link
         .metas
-        .as_ref()
-        .unwrap()
-        .text_metas
         .as_ref()
         .unwrap();
 
@@ -145,16 +138,13 @@ fn parse_links_in_text() {
         Hello from Taiwan here is the link of my [trip](https://link.foo)
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let line = res.get(&1).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let line = res.get(&1).unwrap().text.as_ref().unwrap();
 
-    assert_eq!(line.operator, BaseOperator::Text);
     assert_eq!(line.content, "Hello from Taiwan here is the link of my [trip](https://link.foo)");
     
-    let link = line.metas
-        .as_ref()
-        .unwrap()
-        .text_metas
+    let link = line
+        .metas
         .as_ref()
         .unwrap();
 
@@ -168,16 +158,12 @@ fn parse_images() {
         ![a chinese temple](https://chinese-temple.com)
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let image = res.get(&1).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let image = res.get(&1).unwrap().text.as_ref().unwrap();
 
-    assert_eq!(image.operator, BaseOperator::Text);
     
     let image_metas = image
         .metas
-        .as_ref()
-        .unwrap()
-        .text_metas
         .as_ref()
         .unwrap();
 
@@ -192,15 +178,11 @@ fn parse_images_within_content() {
         here is an image within this text ![bugcat capoo](貓貓)
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let image = res.get(&2).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let image = res.get(&2).unwrap().text.as_ref().unwrap();
 
-    assert_eq!(image.operator, BaseOperator::Text);
     let image_metas = image
         .metas
-        .as_ref()
-        .unwrap()
-        .text_metas
         .as_ref()
         .unwrap();
 
@@ -215,14 +197,11 @@ fn parse_text_style() {
         ha **End** ha
     ";
 
-    let res = token::get_tokens(content).unwrap();
-    let first_line = res.get(&1).unwrap();
+    let res = token::get_textual_tokens(content).unwrap();
+    let first_line = res.get(&1).unwrap().text.as_ref().unwrap();
 
     let first_line_text_metas = first_line
         .metas
-        .as_ref()
-        .unwrap()
-        .text_metas
         .as_ref()
         .unwrap();
 
@@ -242,13 +221,10 @@ fn parse_text_style() {
     assert_eq!(italic_vec[0].word, "text");
     assert_eq!(italic_vec[0].col.unwrap(), 21);
 
-    let second_line = res.get(&2).unwrap();
+    let second_line = res.get(&2).unwrap().text.as_ref().unwrap();
 
     let bold_vec = second_line
         .metas
-        .as_ref()
-        .unwrap()
-        .text_metas
         .as_ref()
         .unwrap()
         .bold
@@ -257,4 +233,88 @@ fn parse_text_style() {
 
     assert_eq!(bold_vec[0].word, "End");
     assert_eq!(bold_vec[0].col.unwrap(), 3);
+}
+
+#[test]
+fn parse_block_code_content() {
+    let content = "
+        ```rust
+        fn main() {
+            println!('hello');
+        } 
+        ```
+    ";
+
+    let res = token::get_code_tokens(content).unwrap();
+
+    let code_header = res.get(&1).unwrap();
+    assert_eq!(code_header.operator, CodeOperator::BlockCodeStart);
+    assert_eq!(code_header.content, "```rust");
+
+    let code_content_fn = res.get(&2).unwrap();
+    assert_eq!(code_content_fn.operator, CodeOperator::BlockCodeContent);
+    assert_eq!(code_content_fn.content, "fn main() {");
+
+    let code_content_body = res.get(&3).unwrap();
+    assert_eq!(code_content_body.operator, CodeOperator::BlockCodeContent);
+    assert_eq!(code_content_body.content, "println!('hello');");
+
+    let code_footer = res.get(&5).unwrap();
+    assert_eq!(code_footer.operator, CodeOperator::BlockCodeEnd);
+    assert_eq!(code_footer.content, "```");
+}
+
+#[test]
+fn parse_block_code_wrap_text() {
+    let content = "
+        this is some code in JS
+
+        ```js
+        console.log('hello')
+        ```
+
+        lol
+    ";
+
+    let res = token::get_code_tokens(content).unwrap();
+
+    let code_header = res.get(&3).unwrap();
+    assert_eq!(code_header.operator, CodeOperator::BlockCodeStart);
+
+    let code_content = res.get(&4).unwrap();
+    assert_eq!(code_content.operator, CodeOperator::BlockCodeContent);
+
+    let code_footer = res.get(&5).unwrap();
+    assert_eq!(code_footer.operator, CodeOperator::BlockCodeEnd);
+}
+
+#[test]
+fn parse_inline_code_token() {
+    let content = "
+        this is some `text`
+        and here `too`
+    ";
+
+    let res = token::get_textual_tokens(content).unwrap();
+    let first_line = res.get(&1).unwrap().text.as_ref().unwrap();
+    let inline_code_content = first_line.metas
+        .as_ref()
+        .unwrap()
+        .inline_code
+        .as_ref()
+        .unwrap();
+
+    let second_line = res.get(&2).unwrap().text.as_ref().unwrap();
+    let sec_inline_code_content = second_line.metas
+        .as_ref()
+        .unwrap()
+        .inline_code
+        .as_ref()
+        .unwrap();
+
+    assert_eq!(inline_code_content[0].word, "text");
+    assert_eq!(inline_code_content[0].col.unwrap(), 13);
+
+    assert_eq!(sec_inline_code_content[0].word, "too");
+    assert_eq!(sec_inline_code_content[0].col.unwrap(), 9);
 }

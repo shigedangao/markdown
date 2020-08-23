@@ -21,9 +21,9 @@
 /// - ~~...~~ -> strikethrought
 /// - []() -> link
 /// - ![]() -> image
+pub mod code;
 pub mod external;
 pub mod heading;
-mod list;
-mod operator;
-mod text;
-pub mod token;
+pub mod list;
+pub mod operator;
+pub mod text_style;
