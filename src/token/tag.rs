@@ -10,7 +10,7 @@ pub enum TagOperator {
     Heading,
     UnorderedList,
     OrderedList,
-    BlockQuotes
+    BlockQuote
 }
 
 impl Default for TagOperator {
@@ -90,7 +90,7 @@ fn match_single_indice(content: &str) -> Option<TagToken> {
         // >
         [bytes::BLOCKQUOTE, ..] => Some(
             TagToken {
-                operator: TagOperator::BlockQuotes,
+                operator: TagOperator::BlockQuote,
                 content: trimmed_content,
                 ..Default::default()
             }

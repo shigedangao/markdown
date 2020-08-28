@@ -54,6 +54,27 @@ pub fn get_text_metas(content: &str) -> Option<TextMetas> {
 
 }
 
+/// Sanitize Content
+///
+/// # Description
+/// Clean the content of any markdown style character
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// String
+pub fn sanitze_content(content: &str) -> String {
+    let wobold = content.replace(pattern::BOLD, "");
+    let wostrike = wobold.replace(pattern::STRIKE, "");
+    let woitalic = wostrike.replace(pattern::ITALIC, "");
+    let wocode = woitalic.replace(pattern::CODE_PATTERN, "");
+
+    wocode
+        .trim()
+        .to_string()
+}
+
 /// Get Kind Content
 ///
 /// # Description

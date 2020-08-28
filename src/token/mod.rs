@@ -8,6 +8,7 @@ use tag::{TagToken, get_tag_token};
 use code::{CodeToken};
 use crate::error;
 
+#[derive(Debug)]
 pub struct TextualToken {
     pub text: Option<TextToken>,
     pub tag: Option<TagToken>
