@@ -105,14 +105,14 @@ pub fn get_image_metas(content: &str) -> Option<Vec<ImageMeta>> {
 /// the generation of the links tree
 ///
 /// # Arguments
-/// * `images` &Vec<ImageMeta>
+/// * `images` &[ImageMeta]
 /// * `link` LinkMeta
 ///
 /// # Return
 /// bool
-fn is_not_image(images: &Vec<ImageMeta>, link_title: &str, link_url: &str) -> bool {
+fn is_not_image(images: &[ImageMeta], link_title: &str, link_url: &str) -> bool {
     let images: Vec<&ImageMeta> = images
-        .into_iter()
+        .iter()
         .filter(|img| img.url == link_url && img.alt_text == link_title)
         .collect();
 

@@ -1,3 +1,4 @@
+use std::clone::Clone;
 use regex::Regex;
 use lazy_static::lazy_static;
 use super::external;
@@ -10,14 +11,14 @@ lazy_static!{
     static ref INLINE_CODE: Regex = Regex::new(r"(`([a-z].*)`)").unwrap();
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextOption {
     pub word: String,
     pub col: Option<usize>
 }
 
 /// TextMetas
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextMetas {
     pub images: Option<Vec<external::ImageMeta>>,
     pub links: Option<Vec<external::LinkMeta>>,
@@ -52,6 +53,27 @@ pub fn get_text_metas(content: &str) -> Option<TextMetas> {
         inline_code
     })
 
+}
+
+/// Sanitize Content
+///
+/// # Description
+/// Clean the content of any markdown style character
+///
+/// # Arguments
+/// * `content` &str
+///
+/// # Return
+/// String
+pub fn sanitze_content(content: &str) -> String {
+    let wobold = content.replace(pattern::BOLD, "");
+    let wostrike = wobold.replace(pattern::STRIKE, "");
+    let woitalic = wostrike.replace(pattern::ITALIC, "");
+    let wocode = woitalic.replace(pattern::CODE_PATTERN, "");
+
+    wocode
+        .trim()
+        .to_string()
 }
 
 /// Get Kind Content

@@ -1,23 +1,24 @@
 use std::default::Default;
+use std::clone::Clone;
 use crate::parser::{list, heading};
 use crate::parser::operator::bytes;
 
 // Minimum character length
 const MIN_CHAR_LENGTH: usize = 2;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TagOperator {
     Heading,
     UnorderedList,
     OrderedList,
-    BlockQuotes
+    BlockQuote
 }
 
 impl Default for TagOperator {
     fn default() -> Self { TagOperator::Heading }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct TagToken { 
     pub line: usize,
     pub content: String,
@@ -25,7 +26,7 @@ pub struct TagToken {
     pub metas: Option<TagMeta>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TagMeta {
     pub heading_kind: heading::HeadingLevel
 }
@@ -90,7 +91,7 @@ fn match_single_indice(content: &str) -> Option<TagToken> {
         // >
         [bytes::BLOCKQUOTE, ..] => Some(
             TagToken {
-                operator: TagOperator::BlockQuotes,
+                operator: TagOperator::BlockQuote,
                 content: trimmed_content,
                 ..Default::default()
             }

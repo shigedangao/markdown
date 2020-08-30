@@ -1,10 +1,12 @@
-use crate::parser::text_style::{TextMetas, get_text_metas};
+use std::clone::Clone;
+use crate::parser::text_style::{TextMetas, get_text_metas, sanitze_content};
 use crate::parser::code;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextToken { 
     pub line: usize,
     pub content: String,
+    pub sanitize_content: String,
     pub metas: Option<TextMetas>
 }
 
@@ -30,6 +32,7 @@ pub fn get_text_tokens(content: &str, line: usize) -> Option<TextToken> {
         TextToken {
             line,
             content: String::from(content.trim()),
+            sanitize_content: sanitze_content(content),
             metas
         }
     )

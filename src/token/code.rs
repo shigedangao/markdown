@@ -4,17 +4,9 @@ use std::clone::Clone;
 use crate::parser::code;
 
 #[derive(Default, Debug, PartialEq, Clone)]
-pub struct CodeMetas {
-    lang: String,
-    previous: Option<usize>,
-    next: Option<usize>
-}
-
-#[derive(Default, Debug, PartialEq, Clone)]
 pub struct CodeToken {
-    line: usize,
+    pub line: usize,
     pub content: String,
-    metas: Option<CodeMetas>,
     pub operator: code::CodeOperator
 }
 
@@ -38,7 +30,6 @@ pub fn get_code_block_tokens(content: &str) -> BTreeMap<usize, CodeToken> {
             let token = CodeToken {
                 line: idx,
                 content: line.trim().to_string(),
-                metas: None,
                 operator: op
             };
 

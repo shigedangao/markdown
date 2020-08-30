@@ -21,7 +21,7 @@ impl Default for HeadingLevel {
 /// # Description
 /// Get the heading depth by counting the number of #
 pub fn get_heading_depth(line: &str) -> HeadingLevel {
-    let res = line.rfind("#");
+    let res = line.rfind('#');
     if let Some(idx) = res {
         return match idx {
             0 => HeadingLevel::H1,

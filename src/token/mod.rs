@@ -3,11 +3,13 @@ pub mod tag;
 pub mod text;
 
 use std::collections::btree_map::BTreeMap;
+use std::clone::Clone;
 use text::{TextToken, get_text_tokens};
 use tag::{TagToken, get_tag_token};
 use code::{CodeToken};
 use crate::error;
 
+#[derive(Debug, Clone)]
 pub struct TextualToken {
     pub text: Option<TextToken>,
     pub tag: Option<TagToken>

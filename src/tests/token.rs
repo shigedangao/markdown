@@ -18,7 +18,7 @@ mod textual {
         let blockquote: &TagToken = token.get(&1).unwrap().tag.as_ref().unwrap();
 
         assert_eq!(blockquote.line, 0);
-        assert_eq!(blockquote.operator, TagOperator::BlockQuotes);
+        assert_eq!(blockquote.operator, TagOperator::BlockQuote);
         assert_eq!(blockquote.content, "Hello my name is xiao");
         assert!(blockquote.metas.is_none());
     }
