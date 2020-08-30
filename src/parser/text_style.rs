@@ -1,3 +1,4 @@
+use std::clone::Clone;
 use regex::Regex;
 use lazy_static::lazy_static;
 use super::external;
@@ -10,14 +11,14 @@ lazy_static!{
     static ref INLINE_CODE: Regex = Regex::new(r"(`([a-z].*)`)").unwrap();
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextOption {
     pub word: String,
     pub col: Option<usize>
 }
 
 /// TextMetas
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextMetas {
     pub images: Option<Vec<external::ImageMeta>>,
     pub links: Option<Vec<external::LinkMeta>>,

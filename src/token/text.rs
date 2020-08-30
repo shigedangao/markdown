@@ -1,7 +1,8 @@
+use std::clone::Clone;
 use crate::parser::text_style::{TextMetas, get_text_metas, sanitze_content};
 use crate::parser::code;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextToken { 
     pub line: usize,
     pub content: String,
