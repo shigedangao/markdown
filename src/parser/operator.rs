@@ -41,10 +41,14 @@ pub mod bytes {
 }
 
 pub mod pattern {
-    // TextOperator -> ~~
-    pub const BOLD: &str = "**";
+    // TextOperator -> **
+    pub const BOLD_STAR: &str = "**";
+    // TextOperator -> __
+    pub const BOLD_UNDER: &str = "__";
     // TextOperator -> *
-    pub const ITALIC: &str = "*";
+    pub const ITALIC_STAR: &str = "*";
+    // TextOeprator -> _
+    pub const ITALIC_UN: &str = "_";
     // TextOperator -> ~~
     pub const STRIKE: &str = "~~";
     // CODE_PATTERN -> `

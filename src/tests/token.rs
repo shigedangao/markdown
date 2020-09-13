@@ -194,8 +194,8 @@ mod textual {
     #[test]
     fn parse_text_style() {
         let content = "
-            This is a ~~strike~~ *text* lol 
-            ha **End** ha
+            This is a ~~strike~~ **loul** *text* _ha_ lol 
+            ha **End** ha __ho__
         ";
 
         let res = token::get_textual_tokens(content).unwrap();
@@ -220,7 +220,10 @@ mod textual {
             .unwrap();
 
         assert_eq!(italic_vec[0].word, "text");
-        assert_eq!(italic_vec[0].col.unwrap(), 21);
+        assert_eq!(italic_vec[0].col.unwrap(), 30);
+
+        assert_eq!(italic_vec[1].word, "ha");
+        assert_eq!(italic_vec[1].col.unwrap(), 37);
 
         let second_line = res.get(&2).unwrap().text.as_ref().unwrap();
 
@@ -234,6 +237,9 @@ mod textual {
 
         assert_eq!(bold_vec[0].word, "End");
         assert_eq!(bold_vec[0].col.unwrap(), 3);
+
+        assert_eq!(bold_vec[1].word, "ho");
+        assert_eq!(bold_vec[1].col.unwrap(), 14);
     }
 
     #[test]
