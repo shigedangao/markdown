@@ -6,8 +6,10 @@ use super::operator::pattern;
 
 lazy_static!{
     static ref STRIKE_RE: Regex = Regex::new(r"(\~\~(.*?)\~\~)").unwrap();
-    static ref BOLD_RE: Regex = Regex::new(r"(\*\*(.*?)\*\*)").unwrap();
+    static ref BOLD_ST_RE: Regex = Regex::new(r"(\*\*(.*?)\*\*)").unwrap();
+    static ref BOLD_UN_RE: Regex = Regex::new(r"(__(.*?)__)").unwrap();
     static ref ITALIC_RE: Regex = Regex::new(r"(\*(.*?)\*)").unwrap();
+    static ref ITALIC_UN_RE: Regex = Regex::new(r"(_(.*?)_)").unwrap();
     static ref INLINE_CODE: Regex = Regex::new(r"(`([a-z].*)`)").unwrap();
 }
 
@@ -40,9 +42,14 @@ pub fn get_text_metas(content: &str) -> Option<TextMetas> {
     let images = external::get_image_metas(content);
     let links = external::get_link_metas(content, &images);
     let strike = get_kind_content(content, pattern::STRIKE, &STRIKE_RE);
-    let bold = get_kind_content(content, pattern::BOLD, &BOLD_RE);
-    let italic = get_kind_content(content, pattern::ITALIC, &ITALIC_RE);
+    let bold_star = get_kind_content(content, pattern::BOLD_STAR, &BOLD_ST_RE);
+    let bold_under = get_kind_content(content, pattern::BOLD_UNDER, &BOLD_UN_RE);
+    let italic_star = get_kind_content(content, pattern::ITALIC_STAR, &ITALIC_RE);
+    let italic_under = get_kind_content(content, pattern::ITALIC_UN, &ITALIC_UN_RE);
     let inline_code = get_kind_content(content, pattern::CODE_PATTERN, &INLINE_CODE);
+
+    let bold = merge_option_vec::<TextOption>(bold_star, bold_under);
+    let italic = merge_option_vec(italic_star, italic_under);
 
     Some(TextMetas {
         images,
@@ -66,14 +73,39 @@ pub fn get_text_metas(content: &str) -> Option<TextMetas> {
 /// # Return
 /// String
 pub fn sanitze_content(content: &str) -> String {
-    let wobold = content.replace(pattern::BOLD, "");
-    let wostrike = wobold.replace(pattern::STRIKE, "");
-    let woitalic = wostrike.replace(pattern::ITALIC, "");
-    let wocode = woitalic.replace(pattern::CODE_PATTERN, "");
+    let wobold = content.replace(pattern::BOLD_STAR, "");
+    let woboldun = wobold.replace(pattern::BOLD_UNDER, "");
+    let wostrike = woboldun.replace(pattern::STRIKE, "");
+    let woitalic = wostrike.replace(pattern::ITALIC_STAR, "");
+    let woitalicun = woitalic.replace(pattern::ITALIC_UN, "");
+    let wocode = woitalicun.replace(pattern::CODE_PATTERN, "");
 
     wocode
         .trim()
         .to_string()
+}
+
+/// Merge Option Vec
+///
+/// # Description
+/// Merge option vector into one
+///
+/// # Arguments
+/// * `a` Option<Vec<T>>
+/// * `b` Option<Vec<T>>
+///
+/// # Return
+/// * `Option<Vec<T<>`
+fn merge_option_vec<T>(a: Option<Vec<T>>, b: Option<Vec<T>>) -> Option<Vec<T>> {
+    if let Some(mut vec_a) = a {
+        if let Some(mut vec_b) = b {
+            vec_a.append(vec_b.as_mut());
+        }
+
+        return Some(vec_a);
+    }
+
+    a
 }
 
 /// Get Kind Content
@@ -91,14 +123,17 @@ pub fn sanitze_content(content: &str) -> String {
 fn get_kind_content(content: &str, pattern: &str, re: &Regex) -> Option<Vec<TextOption>> {
     let captures = re.captures_iter(content);
     let k: Vec<TextOption> = captures
-        .map(|c| {
+        .filter_map(|c| {
             // Index 2 is the content of the capture
-            let word = c.get(2).unwrap().as_str();
+            let word = c.get(2).map_or("", |v| v.as_str());
+            if word.is_empty() {
+                return None;
+            }
 
-            TextOption {
+            Some(TextOption {
                 word: word.to_string(),
                 col: get_indices(pattern, word, content)    
-            }
+            })
         })
         .collect();
 
